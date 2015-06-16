@@ -5,12 +5,14 @@
 #include <math.h>
 #include <string.h>
 #include <algorithm>
+#include <windows.h>
+#include <math.h>
 
 #define REAL_UNIT 1.0
 #define SQR3 sqrt(3)
 #define PI 3.14159265359
-#define PIC 16
-#define PICE 4
+#define PIC 512
+#define PICE 128
 using namespace std;
 
 struct Matrix44{
