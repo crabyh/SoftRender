@@ -1,4 +1,4 @@
-#include "Header.h"
+ï»¿#include "Header.h"
 
 Vertex node[8] = { 
 	Vertex(1, 1, 1), Vertex(1, 1, -1), Vertex(-1, 1, -1), Vertex(-1, 1, 1),
@@ -11,37 +11,37 @@ Facet facets[12] = {
 Vertex node2D[8];
 Vertex node3D[8];
 Facet facet3D[12];
-double zprp = -4;	//Í¶Ó°²Î¿¼µãz×ø±ê
-Vertex light = Vertex(0, 6, 0);	//¹âÔ´×ø±ê
-Vertex position = Vertex(0, 0, 6);	//Á¢·½ÌåÖĞĞÄÎ»ÖÃ
-double fRotate = 0;	//Ğı×ª¶ÈÊı
-double zbuffer[800][800];	//Éî¶Èbuffer
-int gbuffer[800][800];	//ÏÔ´æ
-int pic[PIC+1][PIC+1];	//ÎÆÀí
-bool bAnim = 1;	//¿ØÖÆĞı×ª
-bool bLight = 0;	//¿ØÖÆ¹âÕÕ
-bool bTex = 0;	//¿ØÖÆÎÆÀí
-bool bFill = 1;	//äÖÈ¾·½·¨ 0:ÖØĞÄ×ø±ê 1:ÔöÁ¿
+double zprp = -4;	//æŠ•å½±å‚è€ƒç‚¹zåæ ‡
+Vertex light = Vertex(0, 6, 0);	//å…‰æºåæ ‡
+Vertex position = Vertex(0, 0, 6);	//ç«‹æ–¹ä½“ä¸­å¿ƒä½ç½®
+double fRotate = 0;	//æ—‹è½¬åº¦æ•°
+double zbuffer[800][800];	//æ·±åº¦buffer
+int gbuffer[800][800];	//æ˜¾å­˜
+int pic[PIC+1][PIC+1];	//çº¹ç†
+bool bAnim = 1;	//æ§åˆ¶æ—‹è½¬
+bool bLight = 0;	//æ§åˆ¶å…‰ç…§
+bool bTex = 0;	//æ§åˆ¶çº¹ç†
+bool bFill = 0;	//æ¸²æŸ“æ–¹æ³• 0:å¢é‡ 1:é‡å¿ƒåæ ‡
 
 void LoadBitMapFile(char *filename)
 {
-	FILE *filePtr;//ÎÄ¼şÖ¸Õë
-	BITMAPFILEHEADER bitmapfileheader;//bitmapÎÄ¼şÍ·
-	BITMAPINFOHEADER bitmapinfoheader;//bitmapĞÅÏ¢Í·
+	FILE *filePtr;//æ–‡ä»¶æŒ‡é’ˆ
+	BITMAPFILEHEADER bitmapfileheader;//bitmapæ–‡ä»¶å¤´
+	BITMAPINFOHEADER bitmapinfoheader;//bitmapä¿¡æ¯å¤´
 	int index;
 	int j=0,k=0;
 
 	filePtr = fopen(filename,"rb");
 	if(filePtr == NULL) return;
-	//¶ÁÈëÎÄ¼şÍ·
+	//è¯»å…¥æ–‡ä»¶å¤´
 	fread(&bitmapfileheader,sizeof(BITMAPFILEHEADER),1,filePtr);
-	//ÑéÖ¤ÊÇ·ñÎªbitmapÎÄ¼ş
+	//éªŒè¯æ˜¯å¦ä¸ºbitmapæ–‡ä»¶
 	if (bitmapfileheader.bfType != 0x4D42) return;
-	//¶ÁÈëĞÅÏ¢Í·
+	//è¯»å…¥ä¿¡æ¯å¤´
 	fread(&bitmapinfoheader,sizeof(BITMAPINFOHEADER),1,filePtr);
-	//ÑéÖ¤ÊÇ·ñÎª16Î»µÄÎ»Í¼ÎÄ¼ş
+	//éªŒè¯æ˜¯å¦ä¸º16ä½çš„ä½å›¾æ–‡ä»¶
 	if (bitmapinfoheader.biBitCount != 24) return;
-	//½«ÎÄ¼şÖ¸ÕëÒÆÖÁbitmapÊı¾İ
+	//å°†æ–‡ä»¶æŒ‡é’ˆç§»è‡³bitmapæ•°æ®
 	index = bitmapfileheader.bfOffBits;
 
 	for(j = 0; j < bitmapinfoheader.biWidth; j++){
@@ -63,7 +63,7 @@ void LoadBitMapFile(char *filename)
 }
 
 void Map(){
-	//Ğı×ª¾ØÕó
+	//æ—‹è½¬çŸ©é˜µ
 	double rot[4][4] = {
 		cos(fRotate), 0, -sin(fRotate), 0,
 		0, 1, 0, 0,
@@ -72,7 +72,7 @@ void Map(){
 	};
 	Matrix44 mRotate = Matrix44(rot);
 
-	//Æ½ÒÆ¾ØÕó£¬ÒÆ¶¯µ½position
+	//å¹³ç§»çŸ©é˜µï¼Œç§»åŠ¨åˆ°position
 	double T[4][4] = {
 		1, 0, 0, position.pos.v[0],
 		0, 1, 0, position.pos.v[1],
@@ -81,7 +81,7 @@ void Map(){
 	};
 	Matrix44 mT = Matrix44(T);
 
-	//ÊÀ½ç×ø±êÏµ×ª»»µ½¹Û²ì×ø±êÏµ
+	//ä¸–ç•Œåæ ‡ç³»è½¬æ¢åˆ°è§‚å¯Ÿåæ ‡ç³»
 	double R[4][4] = {
 		1, 0, 0, 0,
 		0, SQR3 / 2, 1.0 / 2, 0,
@@ -91,7 +91,7 @@ void Map(){
 	Matrix44 mR = Matrix44(R);
 
 	for (int i = 0; i < 8; ++i){
-		//Í¸ÊÓÍ¶Ó°±ä»»
+		//é€è§†æŠ•å½±å˜æ¢
 		node3D[i].pos = node2D[i].pos = mT*(mR*(mRotate * node[i].pos));
 		double x = node2D[i].pos.v[0];
 		double y = node2D[i].pos.v[1];
@@ -115,7 +115,7 @@ double getBilinearFilteredPixelColor(double B, double C, int x, int y) {
 	return result;
 }
 
-//Ìî³ä
+//å¡«å……
 void fill1(int facet, double angle){
 	double xa = node2D[facets[facet].a].pos.v[0];
 	double xb = node2D[facets[facet].b].pos.v[0];
@@ -127,12 +127,12 @@ void fill1(int facet, double angle){
 	double zb = node2D[facets[facet].b].pos.v[2];
 	double zc = node2D[facets[facet].c].pos.v[2];
 
-	//¼ÆËãÖØĞÄ×ø±ê±í´ïÊ½µÄ·ÖÄ¸
+	//è®¡ç®—é‡å¿ƒåæ ‡è¡¨è¾¾å¼çš„åˆ†æ¯
 	double den1 = (yb - yc)*xa + (xc - xb)*ya + xb*yc - xc*yb;
 	double den2 = (yc - ya)*xb + (xa - xc)*yb + xc*ya - xa*yc;
 	double den3 = (ya - yb)*xc + (xb - xa)*yc + xa*yb - xb*ya;
 	
-	//¼ÆËãÆÁÄ»¿Õ¼äÈı½ÇĞÎµÄ×îĞ¡¾ØĞÎ
+	//è®¡ç®—å±å¹•ç©ºé—´ä¸‰è§’å½¢çš„æœ€å°çŸ©å½¢
 	int xmin = min(xa, min(xb, xc)) * 400 + 399;
 	int ymin = min(ya, min(yb, yc)) * 400 + 399;
 	int xmax = max(xa, max(xb, xc)) * 400 + 401;
@@ -144,15 +144,15 @@ void fill1(int facet, double angle){
 			double A, B, C;
 			x = (j - 400) / 400.0;
 			y = (k - 400) / 400.0;
-			//¼ÆËãÖØĞÄ×ø±ê
+			//è®¡ç®—é‡å¿ƒåæ ‡
 			A = ((yb - yc)*x + (xc - xb)*y + xb*yc - xc*yb) / den1;
 			B = ((yc - ya)*x + (xa - xc)*y + xc*ya - xa*yc) / den2;
 			C = ((ya - yb)*x + (xb - xa)*y + xa*yb - xb*ya) / den3;
 			
-			if (A>=0 && A <=1 && B>=0 && B <= 1 && C >= 0 && C <=1)	//ÅĞ¶ÏÏñËØµãÊÇ·ñÔÚÈı½ÇĞÎÄÚ
+			if (A>=0 && A <=1 && B>=0 && B <= 1 && C >= 0 && C <=1)	//åˆ¤æ–­åƒç´ ç‚¹æ˜¯å¦åœ¨ä¸‰è§’å½¢å†…
 			{
 
-				//¼ÆËãÏñËØµãËù¶ÔÓ¦ÈıÎ¬¿Õ¼äµãµÄÉî¶È×ø±ê£¬×¢Òâ²»ÊÇ¼òµ¥È¨ÖØÏà¼Ó
+				//è®¡ç®—åƒç´ ç‚¹æ‰€å¯¹åº”ä¸‰ç»´ç©ºé—´ç‚¹çš„æ·±åº¦åæ ‡ï¼Œæ³¨æ„ä¸æ˜¯ç®€å•æƒé‡ç›¸åŠ 
 				double d = 1.0f / (A / (za - zprp) + B / (zb - zprp) + C / (zc - zprp));
 
 				if (d < zbuffer[j][k]){
@@ -160,11 +160,11 @@ void fill1(int facet, double angle){
 					int tx, ty;
 					int pix = 0;
 					
-					//ÎÆÀíÓ³ÉäĞŞÕı£¬¸ù¾İÉî¶È×ø±êĞŞÕı
+					//çº¹ç†æ˜ å°„ä¿®æ­£ï¼Œæ ¹æ®æ·±åº¦åæ ‡ä¿®æ­£
 					tx = B * PIC *d / (zb - zprp);
 					ty = C * PIC *d / (zc - zprp);
 			
-					//Õı·½ĞÎµÄÁ½¸öÃæ£¬Ò»¸ö´ÓÎÆÀí×óÏÂ¿ªÊ¼»­£¬Ò»¸ö´ÓÓÒÉÏ¿ªÊ¼»­
+					//æ­£æ–¹å½¢çš„ä¸¤ä¸ªé¢ï¼Œä¸€ä¸ªä»çº¹ç†å·¦ä¸‹å¼€å§‹ç”»ï¼Œä¸€ä¸ªä»å³ä¸Šå¼€å§‹ç”»
 					if (facet % 2 != 0){
 						pix = pic[tx][ty];
 						//pix = getBilinearFilteredPixelColor( B ,  C , tx, ty);
@@ -176,7 +176,7 @@ void fill1(int facet, double angle){
 						//pix = getBilinearFilteredPixelColor((1 - B), (1 - C), tx, ty);
 					}
 					
-					//¼ÆËãÏñËØµãµÄÔÚÈıÎ¬¿Õ¼äÖĞµÄ×ø±ê
+					//è®¡ç®—åƒç´ ç‚¹çš„åœ¨ä¸‰ç»´ç©ºé—´ä¸­çš„åæ ‡
 					double xa3D = node3D[facets[facet].a].pos.v[0];
 					double xb3D = node3D[facets[facet].b].pos.v[0];
 					double xc3D = node3D[facets[facet].c].pos.v[0];
@@ -193,7 +193,7 @@ void fill1(int facet, double angle){
 					g = (pix >> 8) & 0x0000ff;
 					b = (pix >> 16) & 0x0000ff;
 
-					//¼ÆËãÈëÉä¹âÏßºÍÆ½Ãæ·¨ÏòÁ¿¼Ğ½ÇµÄCOS
+					//è®¡ç®—å…¥å°„å…‰çº¿å’Œå¹³é¢æ³•å‘é‡å¤¹è§’çš„COS
 					if (bLight){
 						double lAngle = ((x3D + light.pos.v[0])*facet3D[facet].vector.v[0] + (y3D + light.pos.v[1])*facet3D[facet].vector.v[1] + z3D*facet3D[facet].vector.v[2]) /
 							(pow(x3D - light.pos.v[0], 2) + pow(y3D - light.pos.v[1], 2) + pow(z3D, 2) + 1);
@@ -210,8 +210,465 @@ void fill1(int facet, double angle){
 	}
 }
 
-//Ìî³ä£¬ÔöÁ¿·½·¨
-void fill2(){}
+//å¡«å……ï¼Œå¢é‡æ–¹æ³•
+void setPixel(int x, int y, double z, double s, double t, int facet, double angle){
+	int tx, ty;
+	int pix = 0;
+
+	//z buffer
+	if (z < zbuffer[x][y]){
+		zbuffer[x][y] = z;
+		tx = (int)(PIC*t);
+		ty = (int)(PIC*s);
+
+		//the two triangle of a face has the translation below
+		if (facet % 2 == 0){
+			pix = pic[tx][ty];
+			//pix = getBilinearFilteredPixelColor( B ,  C , tx, ty);
+		}
+		else{
+			tx = PIC - 1 - tx;
+			ty = PIC - 1 - ty;
+			pix = pic[tx][ty];
+			//pix = getBilinearFilteredPixelColor((1 - B), (1 - C), tx, ty);
+		}
+
+		//using the midpoint of a triangle to judge the light effect
+		double xa3D = node3D[facets[facet].a].pos.v[0];
+		double xb3D = node3D[facets[facet].b].pos.v[0];
+		double xc3D = node3D[facets[facet].c].pos.v[0];
+		double ya3D = node3D[facets[facet].a].pos.v[1];
+		double yb3D = node3D[facets[facet].b].pos.v[1];
+		double yc3D = node3D[facets[facet].c].pos.v[1];
+
+		double x3D = (xa3D + xb3D + xc3D) / 3;
+		double y3D = (ya3D + yb3D + yc3D) / 3;
+		double z3D = z;
+
+		GLubyte r, g, b;
+		r = pix & 0x0000ff;
+		g = (pix >> 8) & 0x0000ff;
+		b = (pix >> 16) & 0x0000ff;
+
+		//è®¡ç®—å…¥å°„å…‰çº¿å’Œå¹³é¢æ³•å‘é‡å¤¹è§’çš„COS
+		if (bLight){
+			double lAngle = ((x3D + light.pos.v[0])*facet3D[facet].vector.v[0] + (y3D + light.pos.v[1])*facet3D[facet].vector.v[1] + z3D*facet3D[facet].vector.v[2]) /
+				(pow(x3D - light.pos.v[0], 2) + pow(y3D - light.pos.v[1], 2) + pow(z3D, 2) + 1);
+			r = fmin(15 * (r + 0) * lAngle + 0 * (r + 64) * pow(lAngle, 10), 255);
+			g = fmin(15 * (g + 0) * lAngle + 0 * (g + 64) * pow(lAngle, 10), 255);
+			b = fmin(15 * (b + 0) * lAngle + 0 * (b + 64) * pow(lAngle, 10), 255);
+		}
+
+		gbuffer[x][y] = (r << 16) | (g << 8) | b;
+
+	}
+}
+
+void fill2(int facet, double angle){
+
+
+	double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+	double point[3][5];
+
+	//get the position of the point after propersition
+
+	x1 = node2D[facets[facet].a].pos.v[0];
+	x2 = node2D[facets[facet].b].pos.v[0];
+	x3 = node2D[facets[facet].c].pos.v[0];
+
+	y1 = node2D[facets[facet].a].pos.v[1];
+	y2 = node2D[facets[facet].b].pos.v[1];
+	y3 = node2D[facets[facet].c].pos.v[1];
+
+	z1 = node2D[facets[facet].a].pos.v[2];
+	z2 = node2D[facets[facet].b].pos.v[2];
+	z3 = node2D[facets[facet].c].pos.v[2];
+
+
+	//translate the position into screen
+	point[0][0] = (int)(x1 * 400 + 400);
+	point[0][1] = (y1 * 400 + 400);
+	point[0][2] = z1 - zprp;
+	point[1][0] = (int)(x2 * 400 + 400);
+	point[1][1] = (y2 * 400 + 400);
+	point[1][2] = z2 - zprp;
+	point[2][0] = (int)(x3 * 400 + 400);
+	point[2][1] = (y3 * 400 + 400);
+	point[2][2] = z3 - zprp;
+
+	//the texure cord of the three points
+	point[0][3] = 0.0;
+	point[0][4] = 1.0;
+	point[1][3] = 1.0;
+	point[1][4] = 1.0;
+	point[2][3] = 0.0;
+	point[2][4] = 0.0;
+
+
+	double tempx, tempy, tempz;
+	double temps, tempt;
+	int left;
+
+	//SORT the point by its Y value
+	for (int i = 0; i<3; i++) {
+		if (point[i][1]>point[0][1]){
+			tempx = point[i][0];
+			tempy = point[i][1];
+			tempz = point[i][2];
+			temps = point[i][3];
+			tempt = point[i][4];
+			point[i][0] = point[0][0];
+			point[i][1] = point[0][1];
+			point[i][2] = point[0][2];
+			point[i][3] = point[0][3];
+			point[i][4] = point[0][4];
+			point[0][0] = tempx;
+			point[0][1] = tempy;
+			point[0][2] = tempz;
+			point[0][3] = temps;
+			point[0][4] = tempt;
+		}
+		if (point[i][1]<point[2][1]){
+			tempx = point[i][0];
+			tempy = point[i][1];
+			tempz = point[i][2];
+			temps = point[i][3];
+			tempt = point[i][4];
+			point[i][0] = point[2][0];
+			point[i][1] = point[2][1];
+			point[i][2] = point[2][2];
+			point[i][3] = point[2][3];
+			point[i][4] = point[2][4];
+			point[2][0] = tempx;
+			point[2][1] = tempy;
+			point[2][2] = tempz;
+			point[2][3] = temps;
+			point[2][4] = tempt;
+		}
+	}
+
+
+
+
+	//calculate the k of three edge
+	double dx1 = (point[0][1] - point[2][1]) / (point[0][0] - point[2][0]);
+	double dx2 = (point[1][1] - point[2][1]) / (point[1][0] - point[2][0]);
+	//determine which edge is on the left side
+	if (max(dx1, dx2)<0 || min(dx1, dx2)>0){
+		left = (dx1>dx2) ? 1 : 0;
+	}
+	else{
+		left = (dx1 <= dx2) ? 1 : 0;
+	}
+
+	//int the y value to avoid accuracy error
+	point[0][1] = (int)point[0][1];
+	point[1][1] = (int)point[1][1];
+	point[2][1] = (int)point[2][1];
+
+	int ymin = point[2][1];
+	int ymax = point[0][1];
+
+	//INIT the edge table
+	std::vector< std::list<EDGE> > slNet(ymax - ymin + 1);
+
+	EDGE e;
+
+	e.xi = point[2][0];
+	e.ymax = ymax;
+	e.dx = 1.0 / ((point[0][1] - point[2][1]) / (point[0][0] - point[2][0]));
+	slNet[0].push_front(e);
+
+	if (point[1][1] == ymin) {
+		e.xi = point[1][0];
+		e.dx = 1.0 / ((point[0][1] - point[1][1]) / (point[0][0] - point[1][0]));
+		slNet[0].push_front(e);
+	}
+	else{
+		e.xi = point[1][0];
+		e.ymax = ymax;
+		e.dx = 1.0 / ((point[0][1] - point[1][1]) / (point[0][0] - point[1][0]));
+		slNet[point[1][1] - ymin].push_front(e);
+
+		e.xi = point[2][0];
+		e.ymax = point[1][1];
+		e.dx = 1.0 / ((point[1][1] - point[2][1]) / (point[1][0] - point[2][0]));
+		slNet[0].push_front(e);
+
+	}
+
+	//divide the entile triangle into 2 part,both are pingjiao
+	//fill
+	//
+	//1/z,is proved to be in the linear relations of x or y
+	//s,t is linearial of 1/z
+
+	EDGE e1, e2;
+	double oneoverz_left, oneoverz_right, oneoverz_step, oneoverz_top, oneoverz_bottom, oneoverz;
+
+	double soverz_top, soverz_bottom; // ä¸Šä¸‹é¡¶ç‚¹s/z
+	double toverz_top, toverz_bottom; // ä¸Šä¸‹é¡¶ç‚¹t/z
+	double soverz_left, soverz_right; // å·¦å³çº¿æ®µs/z
+	double toverz_left, toverz_right; // å·¦å³çº¿æ®µt/z
+	double soverz, soverz_step; // æ’å€¼s/zä»¥åŠæ‰«æçº¿æ­¥é•¿
+	double toverz, toverz_step; // æ’å€¼t/zä»¥åŠæ‰«æçº¿æ­¥é•¿
+	double s, t; // è¦æ±‚çš„åŸå§‹så’Œt
+
+
+	//calculate the triangle bottom
+	//add y & calculate the step
+	for (int y = ymin; y<point[1][1]; y++) {
+		e1 = slNet[y - ymin].front();
+		e2 = slNet[y - ymin].back();
+
+		//swap
+		if (e1.xi>e2.xi){
+			e2 = slNet[y - ymin].front();
+			e1 = slNet[y - ymin].back();
+		}
+
+		//calculate the step of 1/z, s/z,t/z
+		//use its linear relation
+
+		oneoverz_top = 1.0 / point[2][2];
+		oneoverz_bottom = 1.0 / point[1][2];
+
+		if (point[1][1] == point[2][1]) {
+			oneoverz_left = (y - point[2][1]) * (oneoverz_bottom - oneoverz_top) + oneoverz_top;
+
+		}
+		else{
+			oneoverz_left = (y - point[2][1]) * (oneoverz_bottom - oneoverz_top) / (point[1][1] - point[2][1]) + oneoverz_top;
+		}
+		oneoverz_bottom = 1.0 / point[0][2];
+		if (point[0][1] == point[2][1]) {
+			oneoverz_right = (y - point[2][1]) * (oneoverz_bottom - oneoverz_top) + oneoverz_top;
+		}
+		else{
+			oneoverz_right = (y - point[2][1]) * (oneoverz_bottom - oneoverz_top) / (point[0][1] - point[2][1]) + oneoverz_top;
+		}
+		if ((int)e2.xi == (int)e1.xi) {
+			//        if ((point[2][0] - point[1][0]) == 0) {
+			oneoverz_step = 0;
+		}
+		else{
+			oneoverz_step = (oneoverz_right - oneoverz_left) / (e2.xi - e1.xi);
+			//            oneoverz_step = (oneoverz_right-oneoverz_left) / (point[2][0]-point[1][0]);
+		}
+
+
+		soverz_top = point[2][3] / point[2][2];
+		soverz_bottom = point[1][3] / point[1][2];
+		if (point[1][1] == point[2][1]) {
+			soverz_left = (y - point[2][1]) * (soverz_bottom - soverz_top) + soverz_top;
+		}
+		else{
+			soverz_left = (y - point[2][1]) * (soverz_bottom - soverz_top) / (point[1][1] - point[2][1]) + soverz_top;
+		}
+		soverz_bottom = point[0][3] / point[0][2];
+		if (point[0][1] == point[2][1]) {
+			soverz_right = (y - point[2][1]) * (soverz_bottom - soverz_top) + soverz_top;
+		}
+		else{
+			soverz_right = (y - point[2][1]) * (soverz_bottom - soverz_top) / (point[0][1] - point[2][1]) + soverz_top;
+		}
+		if ((int)e2.xi == (int)e1.xi) {
+			//        if ((point[2][0] - point[1][0]) == 0) {
+			soverz_step = 0;
+		}
+		else{
+			soverz_step = (soverz_right - soverz_left) / (e2.xi - e1.xi);
+			//            soverz_step = (soverz_right-soverz_left) / (point[2][0]-point[1][0]);
+		}
+
+
+		toverz_top = point[2][4] / point[2][2];
+		toverz_bottom = point[1][4] / point[1][2];
+		if (point[1][1] == point[2][1]){
+			toverz_left = (y - point[2][1]) * (toverz_bottom - toverz_top) + toverz_top;
+		}
+		else{
+			toverz_left = (y - point[2][1]) * (toverz_bottom - toverz_top) / (point[1][1] - point[2][1]) + toverz_top;
+		}
+		toverz_bottom = point[0][4] / point[0][2];
+		if (point[0][1] == point[2][1]) {
+			toverz_right = (y - point[2][1]) * (toverz_bottom - toverz_top) + toverz_top;
+		}
+		else{
+			toverz_right = (y - point[2][1]) * (toverz_bottom - toverz_top) / (point[0][1] - point[2][1]) + toverz_top;
+		}
+		if ((int)e2.xi == (int)e1.xi) {
+			//        if ((point[2][0] - point[1][0]) == 0) {
+			toverz_step = 0;
+		}
+		else{
+			toverz_step = (toverz_right - toverz_left) / (e2.xi - e1.xi);
+
+		}
+
+
+		if (left == 1){
+			oneoverz = oneoverz_right;
+			soverz = soverz_right;
+			toverz = toverz_right;
+			soverz_step = -soverz_step;
+			toverz_step = -toverz_step;
+			oneoverz_step = -oneoverz_step;
+		}
+		else{
+			oneoverz = oneoverz_left;
+			soverz = soverz_left;
+			toverz = toverz_left;
+		}
+
+		//fill the line by add X
+		for (int x = (int)e1.xi; x<(int)e2.xi; x++, oneoverz += (oneoverz_step), soverz += (soverz_step), toverz += (toverz_step)) {
+
+			s = soverz / oneoverz;
+			t = toverz / oneoverz;
+
+			setPixel(x, y, 1.0 / oneoverz, s, t, facet, angle);
+
+		}
+
+		if ((y + 1)<e1.ymax) {
+			e1.xi += e1.dx;
+			slNet[y - ymin + 1].push_front(e1);
+		}
+		if ((y + 1)<e2.ymax) {
+			e2.xi += e2.dx;
+			slNet[y - ymin + 1].push_front(e2);
+		}
+
+	}
+
+
+	//the same way to the top triangle
+	for (int y = point[1][1]; y<ymax; y++) {
+		e1 = slNet[y - ymin].front();
+		e2 = slNet[y - ymin].back();
+
+		if (e1.xi>e2.xi){
+			e2 = slNet[y - ymin].front();
+			e1 = slNet[y - ymin].back();
+		}
+
+		oneoverz_top = 1.0 / point[0][2];
+		oneoverz_bottom = 1.0 / point[1][2];
+
+		if (point[1][1] == point[0][1]) {
+			oneoverz_left = (y - point[0][1]) * (oneoverz_bottom - oneoverz_top) + oneoverz_top;
+		}
+		else{
+			oneoverz_left = (y - point[0][1]) * (oneoverz_bottom - oneoverz_top) / (point[1][1] - point[0][1]) + oneoverz_top;
+		}
+		oneoverz_bottom = 1.0 / point[2][2];
+		if (point[2][1] == point[0][1]) {
+			oneoverz_right = (y - point[0][1]) * (oneoverz_bottom - oneoverz_top) + oneoverz_top;
+		}
+		else{
+			oneoverz_right = (y - point[0][1]) * (oneoverz_bottom - oneoverz_top) / (point[2][1] - point[0][1]) + oneoverz_top;
+		}
+		if (e2.xi == e1.xi) {
+			//        if ((point[2][0] - point[1][0]) == 0) {
+			oneoverz_step = 0;
+		}
+		else{
+			oneoverz_step = (oneoverz_right - oneoverz_left) / (e2.xi - e1.xi);
+			//            oneoverz_step = (oneoverz_right-oneoverz_left) / (point[2][0]-point[1][0]);
+		}
+
+
+		soverz_top = point[0][3] / point[0][2];
+		soverz_bottom = point[1][3] / point[1][2];
+		if (point[1][1] == point[0][1]) {
+			soverz_left = (y - point[0][1]) * (soverz_bottom - soverz_top) + soverz_top;
+		}
+		else{
+			soverz_left = (y - point[0][1]) * (soverz_bottom - soverz_top) / (point[1][1] - point[0][1]) + soverz_top;
+		}
+		soverz_bottom = point[2][3] / point[2][2];
+		if (point[2][1] == point[0][1]) {
+			soverz_right = (y - point[0][1]) * (soverz_bottom - soverz_top) + soverz_top;
+		}
+		else{
+			soverz_right = (y - point[0][1]) * (soverz_bottom - soverz_top) / (point[2][1] - point[0][1]) + soverz_top;
+		}
+		if (e2.xi == e1.xi) {
+			//        if ((point[2][0] - point[1][0]) == 0) {
+			soverz_step = 0;
+		}
+		else{
+			soverz_step = (soverz_right - soverz_left) / (e2.xi - e1.xi);
+			//            soverz_step = (soverz_right-soverz_left) / (point[2][0]-point[1][0]);
+		}
+
+
+		toverz_top = point[0][4] / point[0][2];
+		toverz_bottom = point[1][4] / point[1][2];
+		if (point[1][1] == point[0][1]){
+			toverz_left = (y - point[0][1]) * (toverz_bottom - toverz_top) + toverz_top;
+		}
+		else{
+			toverz_left = (y - point[0][1]) * (toverz_bottom - toverz_top) / (point[1][1] - point[0][1]) + toverz_top;
+		}
+		toverz_bottom = point[2][4] / point[2][2];
+		if (point[0][1] == point[2][1]) {
+			toverz_right = (y - point[0][1]) * (toverz_bottom - toverz_top) + toverz_top;
+		}
+		else{
+			toverz_right = (y - point[0][1]) * (toverz_bottom - toverz_top) / (point[2][1] - point[0][1]) + toverz_top;
+		}
+		if (e2.xi == e1.xi) {
+			//        if ((point[2][0] - point[1][0]) == 0) {
+			toverz_step = 0;
+		}
+		else{
+			toverz_step = (toverz_right - toverz_left) / (e2.xi - e1.xi);
+			//            toverz_step = (toverz_right-toverz_left) / (point[2][0]-point[1][0]);
+		}
+
+		//        oneoverz = oneoverz_left+(e1.xi-point[1][0])*oneoverz_step;
+		//        soverz = soverz_left+(e1.xi-point[1][0])*soverz_step;
+		//        toverz = toverz_left+(e1.xi-point[1][0])*toverz_step;
+
+
+		if (left == 1){
+			oneoverz = oneoverz_right;
+			soverz = soverz_right;
+			toverz = toverz_right;
+			soverz_step = -soverz_step;
+			toverz_step = -toverz_step;
+			oneoverz_step = -oneoverz_step;
+		}
+		else{
+			oneoverz = oneoverz_left;
+			soverz = soverz_left;
+			toverz = toverz_left;
+		}
+
+
+		for (int x = (int)e1.xi; x<(int)e2.xi; x++, oneoverz += (oneoverz_step), soverz += (soverz_step), toverz += (toverz_step)) {
+
+			s = soverz / oneoverz;
+			t = toverz / oneoverz;
+
+			setPixel(x, y, 1.0 / oneoverz, s, t, facet, angle);
+
+		}
+
+
+		if ((y + 1)<e1.ymax) {
+			e1.xi += e1.dx;
+			slNet[y - ymin + 1].push_front(e1);
+		}
+		if ((y + 1)<e2.ymax) {
+			e2.xi += e2.dx;
+			slNet[y - ymin + 1].push_front(e2);
+		}
+
+	}
+}
 
 void getFPS()
 {
@@ -221,7 +678,19 @@ void getFPS()
 	frame++ ;
 	time = glutGet(GLUT_ELAPSED_TIME);
 	char mode[64];
-	strcpy(mode,"light:\ton");
+	if (bLight){
+		if (bFill)
+			strcpy(mode, "light:\ton, fill: triangle");
+		else
+			strcpy(mode, "light:\ton, fill: Poly");
+	}
+
+	else{
+		if (bFill)
+			strcpy(mode, "light:\toff, fill: triangle");
+		else
+			strcpy(mode, "light:\toff, fill: Poly");
+	}
 	if (time - timebase > 1000) {
 		sprintf(buffer,"FPS:%4.2f",frame*1000.0/(time-timebase));
 		timebase = time;
@@ -230,13 +699,13 @@ void getFPS()
 
 	char *c;
 	glDisable(GL_DEPTH_TEST);
-	glMatrixMode(GL_PROJECTION);  // Ñ¡ÔñÍ¶Ó°¾ØÕó
-	glPushMatrix();               // ±£´æÔ­¾ØÕó
-	glLoadIdentity();             // ×°Èëµ¥Î»¾ØÕó
-	glOrtho(0,480,0,480,-1,1);    // Î»ÖÃÕıÍ¶Ó°
-	glMatrixMode(GL_MODELVIEW);   // Ñ¡ÔñModelview¾ØÕó
-	glPushMatrix();               // ±£´æÔ­¾ØÕó
-	glLoadIdentity();             // ×°Èëµ¥Î»¾ØÕó
+	glMatrixMode(GL_PROJECTION);  // é€‰æ‹©æŠ•å½±çŸ©é˜µ
+	glPushMatrix();               // ä¿å­˜åŸçŸ©é˜µ
+	glLoadIdentity();             // è£…å…¥å•ä½çŸ©é˜µ
+	glOrtho(0,480,0,480,-1,1);    // ä½ç½®æ­£æŠ•å½±
+	glMatrixMode(GL_MODELVIEW);   // é€‰æ‹©ModelviewçŸ©é˜µ
+	glPushMatrix();               // ä¿å­˜åŸçŸ©é˜µ
+	glLoadIdentity();             // è£…å…¥å•ä½çŸ©é˜µ
 	glRasterPos2f(10,10);
 	for (c=buffer; *c != '\0'; c++) {		
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
@@ -245,10 +714,10 @@ void getFPS()
 	for (c=mode; *c != '\0'; c++) {		
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
 	}
-	glMatrixMode(GL_PROJECTION);  // Ñ¡ÔñÍ¶Ó°¾ØÕó
-	glPopMatrix();                // ÖØÖÃÎªÔ­±£´æ¾ØÕó
-	glMatrixMode(GL_MODELVIEW);   // Ñ¡ÔñModelview¾ØÕó
-	glPopMatrix();                // ÖØÖÃÎªÔ­±£´æ¾ØÕó
+	glMatrixMode(GL_PROJECTION);  // é€‰æ‹©æŠ•å½±çŸ©é˜µ
+	glPopMatrix();                // é‡ç½®ä¸ºåŸä¿å­˜çŸ©é˜µ
+	glMatrixMode(GL_MODELVIEW);   // é€‰æ‹©ModelviewçŸ©é˜µ
+	glPopMatrix();                // é‡ç½®ä¸ºåŸä¿å­˜çŸ©é˜µ
 	//glEnable(GL_DEPTH_TEST);	
 }
 
@@ -260,7 +729,7 @@ void redraw(){
 		fRotate += 0.01;
 	}
 
-	//³õÊ¼»¯buffer
+	//åˆå§‹åŒ–buffer
 	for (int j = 0; j < 800; ++j){
 		for (int k = 0; k < 800; ++k){
 			zbuffer[j][k] = 100;
@@ -268,7 +737,7 @@ void redraw(){
 		}
 	}
 	for (int i = 0; i < 12; ++i){
-		//¼ÆËãÃæµ½ÊÓ½ÇµÄ½Ç¶È
+		//è®¡ç®—é¢åˆ°è§†è§’çš„è§’åº¦
 		double inir = PI * 180 / 180;
 		double rot[4][4] = {
 			cos(fRotate + inir), 0, -sin(fRotate + inir), 0,
@@ -281,18 +750,18 @@ void redraw(){
 		facet3D[i].vector = mRotate * facets[i].vector;
 		double angle = (mRotate * facets[i].vector).v[1] * 1 / 2.0 + (mRotate * facets[i].vector).v[2] * SQR3 / 2; 
 		
-		//±³ÃæÌŞ³ı£¬Ö»Ìî³äÏòÁ¿ºÍÊÓÏß³ÉÕıÖµµÄÃæ
+		//èƒŒé¢å‰”é™¤ï¼Œåªå¡«å……å‘é‡å’Œè§†çº¿æˆæ­£å€¼çš„é¢
 		if (angle >= 0){
 			if (bFill){
 				fill1(i, angle);
 			}
 			else{
-				fill2();
+				fill2(i, angle);
 			}
 		}
 	}
 	
-	//OpenGL»­µã
+	//OpenGLç”»ç‚¹
 	glBegin(GL_POINTS);
 	for (int j = 0; j < 800; ++j){
 		for (int k = 0; k < 800; ++k){
@@ -316,7 +785,7 @@ void idle()
 	glutPostRedisplay();
 }
 
-//³õÊ¼»¯ÎÆÀí
+//åˆå§‹åŒ–çº¹ç†
 void iniPic(){
 	if (bTex){
 		LoadBitMapFile("Monet.bmp");
