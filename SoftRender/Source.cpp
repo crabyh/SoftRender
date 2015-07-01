@@ -210,7 +210,6 @@ void fill1(int facet, double angle){
 	}
 }
 
-//填充，增量方法
 void setPixel(int x, int y, double z, double s, double t, int facet, double angle){
 	int tx, ty;
 	int pix = 0;
@@ -222,6 +221,7 @@ void setPixel(int x, int y, double z, double s, double t, int facet, double angl
 		ty = (int)(PIC*s);
 
 		//the two triangle of a face has the translation below
+		//如果是对称三角形，坐标对称变换
 		if (facet % 2 == 0){
 			pix = pic[tx][ty];
 			//pix = getBilinearFilteredPixelColor( B ,  C , tx, ty);
@@ -234,6 +234,8 @@ void setPixel(int x, int y, double z, double s, double t, int facet, double angl
 		}
 
 		//using the midpoint of a triangle to judge the light effect
+
+		//提取三个顶点的3d坐标，取中点信息带入光照模型计算真实的rgb色彩
 		double xa3D = node3D[facets[facet].a].pos.v[0];
 		double xb3D = node3D[facets[facet].b].pos.v[0];
 		double xc3D = node3D[facets[facet].c].pos.v[0];
@@ -250,7 +252,7 @@ void setPixel(int x, int y, double z, double s, double t, int facet, double angl
 		g = (pix >> 8) & 0x0000ff;
 		b = (pix >> 16) & 0x0000ff;
 
-		//计算入射光线和平面法向量夹角的COS
+		//º∆À„»Î…‰π‚œﬂ∫Õ∆Ω√Ê∑®œÚ¡øº–Ω«µƒCOS
 		if (bLight){
 			double lAngle = ((x3D + light.pos.v[0])*facet3D[facet].vector.v[0] + (y3D + light.pos.v[1])*facet3D[facet].vector.v[1] + z3D*facet3D[facet].vector.v[2]) /
 				(pow(x3D - light.pos.v[0], 2) + pow(y3D - light.pos.v[1], 2) + pow(z3D, 2) + 1);
@@ -264,6 +266,14 @@ void setPixel(int x, int y, double z, double s, double t, int facet, double angl
 	}
 }
 
+
+//
+//typedef struct tagEDGE{
+//    double xi;
+//    double dx;
+//    int ymax;
+//}EDGE;
+
 void fill2(int facet, double angle){
 
 
@@ -271,7 +281,7 @@ void fill2(int facet, double angle){
 	double point[3][5];
 
 	//get the position of the point after propersition
-
+	//提取透视后的坐标
 	x1 = node2D[facets[facet].a].pos.v[0];
 	x2 = node2D[facets[facet].b].pos.v[0];
 	x3 = node2D[facets[facet].c].pos.v[0];
@@ -286,6 +296,7 @@ void fill2(int facet, double angle){
 
 
 	//translate the position into screen
+	//变换到屏幕坐标系
 	point[0][0] = (int)(x1 * 400 + 400);
 	point[0][1] = (y1 * 400 + 400);
 	point[0][2] = z1 - zprp;
@@ -297,6 +308,7 @@ void fill2(int facet, double angle){
 	point[2][2] = z3 - zprp;
 
 	//the texure cord of the three points
+	//三个顶点纹理坐标赋值
 	point[0][3] = 0.0;
 	point[0][4] = 1.0;
 	point[1][3] = 1.0;
@@ -310,6 +322,7 @@ void fill2(int facet, double angle){
 	int left;
 
 	//SORT the point by its Y value
+	//根据y的大小，三个顶点排序
 	for (int i = 0; i<3; i++) {
 		if (point[i][1]>point[0][1]){
 			tempx = point[i][0];
@@ -349,7 +362,7 @@ void fill2(int facet, double angle){
 
 
 
-
+	//计算三条边的斜率，判断哪条边在底点左边
 	//calculate the k of three edge
 	double dx1 = (point[0][1] - point[2][1]) / (point[0][0] - point[2][0]);
 	double dx2 = (point[1][1] - point[2][1]) / (point[1][0] - point[2][0]);
@@ -362,6 +375,7 @@ void fill2(int facet, double angle){
 	}
 
 	//int the y value to avoid accuracy error
+	//整数化，避免精度错误
 	point[0][1] = (int)point[0][1];
 	point[1][1] = (int)point[1][1];
 	point[2][1] = (int)point[2][1];
@@ -370,15 +384,18 @@ void fill2(int facet, double angle){
 	int ymax = point[0][1];
 
 	//INIT the edge table
+	//初始化活动边表
 	std::vector< std::list<EDGE> > slNet(ymax - ymin + 1);
 
 	EDGE e;
 
+	//底部边表项
 	e.xi = point[2][0];
 	e.ymax = ymax;
 	e.dx = 1.0 / ((point[0][1] - point[2][1]) / (point[0][0] - point[2][0]));
 	slNet[0].push_front(e);
 
+	//中间点边表项
 	if (point[1][1] == ymin) {
 		e.xi = point[1][0];
 		e.dx = 1.0 / ((point[0][1] - point[1][1]) / (point[0][0] - point[1][0]));
@@ -389,6 +406,7 @@ void fill2(int facet, double angle){
 		e.ymax = ymax;
 		e.dx = 1.0 / ((point[0][1] - point[1][1]) / (point[0][0] - point[1][0]));
 		slNet[point[1][1] - ymin].push_front(e);
+
 
 		e.xi = point[2][0];
 		e.ymax = point[1][1];
@@ -402,6 +420,9 @@ void fill2(int facet, double angle){
 	//
 	//1/z,is proved to be in the linear relations of x or y
 	//s,t is linearial of 1/z
+
+	//分成两个平角三角形进行填充
+	//纹理坐标s,t和1/z线性相关
 
 	EDGE e1, e2;
 	double oneoverz_left, oneoverz_right, oneoverz_step, oneoverz_top, oneoverz_bottom, oneoverz;
@@ -417,11 +438,13 @@ void fill2(int facet, double angle){
 
 	//calculate the triangle bottom
 	//add y & calculate the step
+	//从下到上填充下面的三角形
 	for (int y = ymin; y<point[1][1]; y++) {
 		e1 = slNet[y - ymin].front();
 		e2 = slNet[y - ymin].back();
 
 		//swap
+		//交换保证填充顺序正确
 		if (e1.xi>e2.xi){
 			e2 = slNet[y - ymin].front();
 			e1 = slNet[y - ymin].back();
@@ -430,6 +453,7 @@ void fill2(int facet, double angle){
 		//calculate the step of 1/z, s/z,t/z
 		//use its linear relation
 
+		//分别计算1/z s/z t/z 和 线性梯度
 		oneoverz_top = 1.0 / point[2][2];
 		oneoverz_bottom = 1.0 / point[1][2];
 
@@ -506,7 +530,7 @@ void fill2(int facet, double angle){
 
 		}
 
-
+		//调整边的左右关系，确保x递增顺序正确
 		if (left == 1){
 			oneoverz = oneoverz_right;
 			soverz = soverz_right;
@@ -522,6 +546,7 @@ void fill2(int facet, double angle){
 		}
 
 		//fill the line by add X
+		//递增x，计算每个点真实的s,t，进行填充
 		for (int x = (int)e1.xi; x<(int)e2.xi; x++, oneoverz += (oneoverz_step), soverz += (soverz_step), toverz += (toverz_step)) {
 
 			s = soverz / oneoverz;
@@ -531,6 +556,7 @@ void fill2(int facet, double angle){
 
 		}
 
+		//更新下一行边表项
 		if ((y + 1)<e1.ymax) {
 			e1.xi += e1.dx;
 			slNet[y - ymin + 1].push_front(e1);
@@ -544,6 +570,7 @@ void fill2(int facet, double angle){
 
 
 	//the same way to the top triangle
+	//同上，填充上面的
 	for (int y = point[1][1]; y<ymax; y++) {
 		e1 = slNet[y - ymin].front();
 		e2 = slNet[y - ymin].back();
@@ -668,7 +695,9 @@ void fill2(int facet, double angle){
 		}
 
 	}
+
 }
+
 
 void getFPS()
 {
